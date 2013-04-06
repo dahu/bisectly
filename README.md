@@ -1,4 +1,0 @@
-bisectly
-========
-
-Binary search tool

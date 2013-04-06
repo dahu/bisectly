@@ -1,0 +1,64 @@
+*bisectly.txt*	For Vim version 7.3	Last change: 2013-04-06
+
+
+			VIM REFERENCE MANUAL	by Barry Arthur
+
+
+Help on using bisectly                                            *bisectly*
+
+1. Introduction				|bisectly-intro|
+2. Usage				|bisectly-usage|
+
+==============================================================================
+ 1. INTRODUCTION                                            *bisectly-intro*
+
+Bisectly is a plugin-manager agnostic fault localisation tool for
+finding which plugin is causing you nose-bleeds.
+
+==============================================================================
+ 2. USAGE                                                   *bisectly-usage*
+
+Start Vim normally and then type:
+>
+  :Bisectly
+<
+
+You will be presented with a fresh instance of Vim. Test if your
+problem still exists. If it does, type :Zombies to signify your
+disgust and frustration with this hellish affliction. If the problem
+has magically vanished then type :Unicorns and watch them dance gaily
+in the fields with wild abandon. Of course, for the morbidly lazy or
+chronically serious, these two commands can be more simply entered as
+:Z and :U respectively.
+
+This process will repeat several times over as your plugin set is
+whittled down in pursuit of the culprit behind your woes. Hopefully
+the fault exists in a single plugin. If so, Bisectly should be able to
+tell you which one that is. If you answer :Unicorns all the way
+through, then Bisectly will complain that there was no fault found.
+You might want to reconsider your tests or the consistency with which
+you applied them if you get this message.
+
+Weird Things~
+
+Because Bisectly disables clumps of your 'runtimepath' at each turn,
+you might occasionally get some spurious error messages or warnings as
+the Vim instance starts. These messages can be caused by complaining
+plugins that are missing part of their own architecture (their
+mainline code is loaded, say, but their /after/ code was excised from
+this run) or a plugin they depend on.
+
+One thing to keep an eye out for in your tests is a change in the
+negative-test behaviour. For instance, you know your tests behave a
+certain way when you the bug you're hunting is not present. You know
+when it is present, clearly. After a few iterations like this, be
+conscious of new and different messages or failures or responses that
+superficially look like a negative-hit, but might indicate that your
+bug is _trying_ to activate but can't because a dependent plugin is
+missing. In that case, incorrectly responding with :Unicorns here will
+result in Bisectly ultimately telling you that it couldn't locate a
+fault, or worse, misrepresenting the origin of the fault.
+
+Happy hunting.
+
+" vim:tw=78:ts=8:ft=help:norl:
