@@ -51,7 +51,9 @@ function! Bisector()
     call self.make_rc_file()
     silent! execute '!vim -N -u ' . self.rc_file
           \ . ' -c ' . shellescape('command! Unicorns q', 1)
+          \ . ' -c ' . shellescape('command! U q', 1)
           \ . ' -c ' . shellescape('command! Zombies cq', 1)
+          \ . ' -c ' . shellescape('command! Z cq', 1)
   endfunc
 
   func b.locate_fault() dict
