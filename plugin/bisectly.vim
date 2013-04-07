@@ -122,7 +122,7 @@ func Bisectly(...)
 endfunc
 
 " Commands: {{{1
-command! -nargs=? -complete=file Bisectly call Bisectly("<args>")
+command! -nargs=* -complete=file Bisectly call Bisectly("<args>")
 
 " Teardown:{{{1
 "reset &cpo back to users setting
