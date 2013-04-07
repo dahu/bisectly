@@ -33,10 +33,20 @@ set cpo&vim
 "let g:loaded_bisectly = 1
 
 " Private Functions: {{{1
-function! Bisector()
+function! Bisector(...)
   let b = {}
   let b.all = split(&rtp, '\\\@<!,')
   let b.rc_file = tempname() . '_bisectly.vimrc'
+  let b.diagnostic = ''
+  if a:0
+    let b.diagnostic = a:1
+  endif
+  let b.vim_command = '!vim -N -u ' . b.rc_file
+          \ . ' -c ' . shellescape('command! Unicorns q!', 1)
+          \ . ' -c ' . shellescape('command! U q!', 1)
+          \ . ' -c ' . shellescape('command! Zombies cq!', 1)
+          \ . ' -c ' . shellescape('command! Z cq!', 1)
+          \ . ' -c ' . shellescape(b.diagnostic, 1)
 
   func b.make_rc_file() dict abort
     " TODO: allow user to provide a base vimrc that gets copied into
@@ -49,11 +59,7 @@ function! Bisector()
 
   func b.vim_test_run() dict
     call self.make_rc_file()
-    silent! execute '!vim -N -u ' . self.rc_file
-          \ . ' -c ' . shellescape('command! Unicorns q', 1)
-          \ . ' -c ' . shellescape('command! U q', 1)
-          \ . ' -c ' . shellescape('command! Zombies cq', 1)
-          \ . ' -c ' . shellescape('command! Z cq', 1)
+    silent! execute self.vim_command
   endfunc
 
   func b.locate_fault() dict
@@ -104,15 +110,19 @@ function! Bisector()
 endfunction
 
 " Public Interface: {{{1
-func Bisectly()
-  let bisector = Bisector()
+func Bisectly(...)
+  let diagnostic = ''
+  if a:0
+    let diagnostic = a:1
+  endif
+  let bisector = Bisector(diagnostic)
   let fault = bisector.locate_fault()
   redraw!
   call bisector.report_fault(fault)
 endfunc
 
 " Commands: {{{1
-command! Bisectly call Bisectly()
+command! -nargs=? -complete=file Bisectly call Bisectly("<args>")
 
 " Teardown:{{{1
 "reset &cpo back to users setting
