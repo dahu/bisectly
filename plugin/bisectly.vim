@@ -42,10 +42,10 @@ function! Bisector(...)
     let b.diagnostic = a:1
   endif
   let b.vim_command = '!vim -N -u ' . b.rc_file
-          \ . ' -c ' . shellescape('command! Unicorns q!', 1)
-          \ . ' -c ' . shellescape('command! U q!', 1)
-          \ . ' -c ' . shellescape('command! Zombies cq!', 1)
-          \ . ' -c ' . shellescape('command! Z cq!', 1)
+          \ . ' -c ' . shellescape('command! -bar Unicorns q!', 1)
+          \ . ' -c ' . shellescape('command! -bar U q!', 1)
+          \ . ' -c ' . shellescape('command! -bar Zombies cq!', 1)
+          \ . ' -c ' . shellescape('command! -bar Z cq!', 1)
           \ . ' -c ' . shellescape(b.diagnostic, 1)
 
   func b.make_rc_file() dict abort

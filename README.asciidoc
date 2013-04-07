@@ -9,6 +9,12 @@ finding which plugin is causing you nose-bleeds.
 Usage
 ~~~~~
 
+.Manual Operation
+
+Use this if you want to manually test every activated Vim instance by
+hand. See the Automated Operation for using a fixed command or script
+to automate the hunt.
+
 Start Vim normally and then type `:Bisectly`
 
 You will be presented with a fresh instance of Vim. Test if your
@@ -26,6 +32,21 @@ tell you which one that is. If you answer `:Unicorns` all the way
 through, then Bisectly will complain that there was no fault found.
 You might want to reconsider your tests or the consistency with which
 you applied them if you get this message.
+
+.Automated Operation
+
+1. Using an inline expression:
+
+  :Bisectly if exists(':Tabularize') | Zombies | else | Unicorns | endif
+
+2. Using a test script:
+
+  :Bisectly so f-jumps-over-lines.vim
+
+This will execute the script `f-jumps-over-lines.vim` in every test
+instance. That test script should call `:Unicorns` and `:Zombies` as
+appropriate. See the `f-jumps-over-lines.vim` script in the Bisectly
+release for an example.
 
 Weird Things
 ~~~~~~~~~~~~
