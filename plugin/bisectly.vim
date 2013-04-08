@@ -50,13 +50,15 @@ function! Bisector(...)
   if !exists('g:bisectly')
     let g:bisectly = {}
   endif
+  let b.user_rc = get(g:bisectly, 'vimrc', '')
 
   func b.make_rc_file() dict abort
-    " TODO: allow user to provide a base vimrc that gets copied into
-    " self.rc_file after the &rtp block
     let lines='set rtp='.join(self.all[self.enabled[0] : self.enabled[1]], ',')
+    let user_lines = !empty(self.user_rc) && filereadable(self.user_rc)
+          \ ? ['', '"User provided content starts here',] + readfile(self.user_rc)
+          \ : []
     try
-      call writefile(split(lines, "\n"), self.rc_file)
+      call writefile(split(lines, "\n") + user_lines, self.rc_file)
     endtry
   endfunc
 
