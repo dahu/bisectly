@@ -56,7 +56,8 @@ function! Bisector(...)
   if !empty(b.always_on)
     let b.always_on = filter(copy(b.all), 'fnamemodify(v:val, ":t") =~# '.join(b.always_on, '\|'))
   endif
-  call filter(b.all, 'index(b.always_on, v:val) == -1')
+  let b.always_off = get(g:bisectly), 'always_off', []
+  call filter(b.all, 'index(b.always_on, v:val) == -1 || index(b.always_off, v:val) == -1')
 
   func b.make_rc_file() dict abort
     let rtp = self.all[self.enabled[0] : self.enabled[1]]
