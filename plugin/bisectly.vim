@@ -47,6 +47,9 @@ function! Bisector(...)
           \ . ' -c ' . shellescape('command! -bar Zombies cq!', 1)
           \ . ' -c ' . shellescape('command! -bar Z cq!', 1)
           \ . ' -c ' . shellescape(b.diagnostic, 1)
+  if !exists('g:bisectly')
+    let g:bisectly = {}
+  endif
 
   func b.make_rc_file() dict abort
     " TODO: allow user to provide a base vimrc that gets copied into
