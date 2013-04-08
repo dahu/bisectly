@@ -51,9 +51,18 @@ function! Bisector(...)
     let g:bisectly = {}
   endif
   let b.user_rc = get(g:bisectly, 'vimrc', '')
+  "XXX Would a regex work better?
+  let b.always_on = get(g:bisectly, 'always_on', [])
+  if !empty(b.always_on)
+    let b.always_on = filter(copy(b.all), 'fnamemodify(v:val, ":t") =~# '.join(b.always_on, '\|'))
+  endif
+  call filter(b.all, 'index(b.always_on, v:val) == -1')
 
   func b.make_rc_file() dict abort
-    let lines='set rtp='.join(self.all[self.enabled[0] : self.enabled[1]], ',')
+    let rtp = self.all[self.enabled[0] : self.enabled[1]]
+    " TODO Improve handling of 'after' entries.
+    let rtp = self.always_on + rtp
+    let lines='set rtp='.join(rtp, ',')
     let user_lines = !empty(self.user_rc) && filereadable(self.user_rc)
           \ ? ['', '"User provided content starts here',] + readfile(self.user_rc)
           \ : []
