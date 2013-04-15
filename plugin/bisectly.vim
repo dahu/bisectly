@@ -65,7 +65,7 @@ function! Bisector(...)
     let rtp = self.always_on + rtp
     let lines='set rtp='.join(rtp, ',')
     let user_lines = !empty(self.user_rc) && filereadable(self.user_rc)
-          \ ? ['', '" Source user vimrc:', 'source ' . self.user_rc]
+          \ ? ['', '" Source user vimrc:', 'source ' . fnameescape(self.user_rc)]
           \ : []
     try
       call writefile(split(lines, "\n") + user_lines, self.rc_file)
