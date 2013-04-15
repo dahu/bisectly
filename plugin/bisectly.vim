@@ -51,24 +51,39 @@ function! Bisector(...)
     let g:bisectly = {}
   endif
   let b.user_rc = get(g:bisectly, 'vimrc', '')
-  "XXX Would a regex work better?
-  let b.always_on = get(g:bisectly, 'always_on', [])
-  if !empty(b.always_on)
-    let b.always_on = filter(copy(b.all), 'fnamemodify(v:val, ":t") =~# '.join(b.always_on, '\|'))
+  let always_on = get(g:bisectly, 'always_on', '')
+  if !empty(always_on)
+    let b.always_on = filter(copy(b.all), 'v:val =~# always_on')
+    call filter(b.all, 'v:val !~# always_on')
+  else
+    let b.always_on = []
   endif
-  let b.always_off = get(g:bisectly), 'always_off', []
-  call filter(b.all, 'index(b.always_on, v:val) == -1 || index(b.always_off, v:val) == -1')
+  let b.on_before = filter(copy(b.always_on), 'fnamemodify(v:val, ":t") !=# "after"')
+  call map(b.on_before, 'fnameescape(v:val)')
+  let b.on_after = filter(copy(b.always_on), 'fnamemodify(v:val, ":t") ==# "after"')
+  call map(b.on_after, 'fnameescape(v:val)')
+  let always_off = get(g:bisectly, 'always_off', '')
+  if !empty(always_off)
+    call filter(b.all, 'v:val !~# always_off')
+  endif
 
   func b.make_rc_file() dict abort
     let rtp = self.all[self.enabled[0] : self.enabled[1]]
-    " TODO Improve handling of 'after' entries.
-    let rtp = self.always_on + rtp
-    let lines='set rtp='.join(rtp, ',')
-    let user_lines = !empty(self.user_rc) && filereadable(self.user_rc)
+    call map(rtp, 'fnameescape(v:val)')
+    let on_before = [
+          \ '" Always on:',
+          \ 'set rtp='.join(self.on_before, ',')]
+    let bisected_rtp = [
+          \ '" Bisected &rtp:',
+          \ 'set rtp+='.join(rtp, ',')]
+    let on_after = [
+          \ '" Always on (after directories):',
+          \ 'set rtp+='.join(self.on_after, ',')]
+    let user_rc = !empty(self.user_rc) && filereadable(self.user_rc)
           \ ? ['', '" Source user vimrc:', 'source ' . fnameescape(self.user_rc)]
           \ : []
     try
-      call writefile(split(lines, "\n") + user_lines, self.rc_file)
+      call writefile((on_before + bisected_rtp + on_after + user_rc), self.rc_file)
     endtry
   endfunc
 
