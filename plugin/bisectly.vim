@@ -84,18 +84,25 @@ function! Bisector(...)
           \ : []
     try
       call writefile((on_before + bisected_rtp + on_after + user_rc), self.rc_file)
+    catch
+      return 1
     endtry
   endfunc
 
   func b.vim_test_run() dict
-    call self.make_rc_file()
+    if self.make_rc_file()
+      return 1
+    endif
     silent! execute self.vim_command
   endfunc
 
   func b.locate_fault() dict
     let self.enabled = [0, (len(self.all) / 2)]
     let self.disabled = [(len(self.all) / 2) + 1, len(self.all) - 1]
-    call self.vim_test_run()
+    if self.vim_test_run()
+      throw 'VIMRC'
+      return 1
+    endif
 
     " TODO: might need a better loop termination condition
     while self.enabled[0] != self.enabled[1]
@@ -114,7 +121,10 @@ function! Bisector(...)
       let half = range[0] + (range[1] - range[0]) / 2
       let self.enabled = [range[0], half]
       let self.disabled = [half + 1, range[1]]
-      call self.vim_test_run()
+      if self.vim_test_run()
+        throw 'VIMRC'
+        return 1
+      endif
     endwhile
 
     if v:shell_error == 0
@@ -146,7 +156,16 @@ func Bisectly(...)
     let diagnostic = a:1
   endif
   let bisector = Bisector(diagnostic)
-  let fault = bisector.locate_fault()
+  try
+    let fault = bisector.locate_fault()
+  catch 'VIMRC'
+    echohl ErrorMsg
+    echom 'Bisectly: There was a problem creating the custom vimrc at "' . bisector.rc_file . '".'
+    echohl WarningMsg
+    echom 'Bisectly: Aborting.'
+    echohl NONE
+    return
+  endtry
   redraw!
   call bisector.report_fault(fault)
 endfunc
