@@ -140,7 +140,7 @@ function! Bisector(...)
 endfunction
 
 " Public Interface: {{{1
-func Bisectly(...)
+function! Bisectly(...)
   let diagnostic = ''
   if a:0
     let diagnostic = a:1
