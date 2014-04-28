@@ -32,6 +32,15 @@ set cpo&vim
 "endif
 "let g:loaded_bisectly = 1
 
+" Options: {{{1
+if !exists('g:bisectly_log')
+  let g:bisectly_log = expand('<sfile>:p:h:h') . '/bisectly.log'
+endif
+
+if !exists('g:vim_exe')
+  let g:vim_exe = 'vim'
+endif
+
 " Private Functions: {{{1
 function! Bisector(...)
   let b = {}
@@ -41,7 +50,7 @@ function! Bisector(...)
   if a:0
     let b.diagnostic = a:1
   endif
-  let b.vim_command = '!vim -N -u ' . b.rc_file
+  let b.vim_command = '!' . g:vim_exe . ' -N -u ' . b.rc_file
           \ . ' -c ' . shellescape('command! -bar Unicorns qa!', 1)
           \ . ' -c ' . shellescape('command! -bar U qa!', 1)
           \ . ' -c ' . shellescape('command! -bar Zombies cq!', 1)
@@ -90,19 +99,49 @@ function! Bisector(...)
   func b.vim_test_run() dict
     call self.make_rc_file()
     silent! execute self.vim_command
+    let self._shell_error = v:shell_error
+  endfunc
+
+  func b._read_log() dict
+    if ! filereadable(g:bisectly_log)
+      return []
+    else
+      return readfile(g:bisectly_log)
+    endif
+  endfunc
+
+  func b._string(data) dict
+    if type(a:data) == type([])
+      return join(map(a:data, 'self._string(v:val)'), "\n")
+    else
+      return a:data
+    endif
+  endfunc
+
+  func b._write_log(data) dict
+    call writefile(split(self._string(a:data), "\n"), g:bisectly_log)
+  endfunc
+
+  func b.log(stuff) dict
+    let data = self._read_log()
+    call add(data, [strftime('%c')])
+    call add(data, a:stuff)
+    call self._write_log(data)
   endfunc
 
   func b.locate_fault() dict
-    let self.enabled = [0, (len(self.all) / 2)]
-    let self.disabled = [(len(self.all) / 2) + 1, len(self.all) - 1]
-    call self.vim_test_run()
+    let self.enabled = [0, len(self.all)]
+    let self.disabled = []
+    " prime the loop below sith a spurious shell_error to force division of
+    " the enabled set of plugins
+    let self._shell_error = 1
 
     " TODO: might need a better loop termination condition
     while self.enabled[0] != self.enabled[1]
       " halve the enabled range depending on v:shell_error.
       " v:shell_error == 1 when exited with :cq (:Zombies), meaning the user
       " considers this session to possess the pertinent fault.
-      if v:shell_error == 0
+      if self._shell_error == 0
         let range = self.disabled
         " no fault found, so we need to keep looking in the previously disabled
         " half
@@ -114,10 +153,11 @@ function! Bisector(...)
       let half = range[0] + (range[1] - range[0]) / 2
       let self.enabled = [range[0], half]
       let self.disabled = [half + 1, range[1]]
+      call self.log(["enabled:"] + self.enabled + ["disabled:"] + self.disabled)
       call self.vim_test_run()
     endwhile
 
-    if v:shell_error == 0
+    if self._shell_error == 0
       return self.disabled[0]
     else
       return self.enabled[0]
@@ -145,10 +185,13 @@ function! Bisectly(...)
   if a:0
     let diagnostic = a:1
   endif
+  let old_shell = &shell
+  set shell=/bin/sh
   let bisector = Bisector(diagnostic)
   let fault = bisector.locate_fault()
   redraw!
   call bisector.report_fault(fault)
+  let &shell = old_shell
 endfunc
 
 " Commands: {{{1
