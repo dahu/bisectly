@@ -153,7 +153,7 @@ function! Bisector(...)
       let half = range[0] + (range[1] - range[0]) / 2
       let self.enabled = [range[0], half]
       let self.disabled = [half + 1, range[1]]
-      call self.log(["enabled:"] + self.enabled + ["disabled:"] + self.disabled)
+      call self.log(["enabled:"] + self.all[self.enabled[0]:self.enabled[1]] + ["disabled:"] + self.all[self.disabled[0]:self.disabled[1]])
       call self.vim_test_run()
     endwhile
 
@@ -187,6 +187,7 @@ function! Bisectly(...)
   endif
   let old_shell = &shell
   set shell=/bin/sh
+  call delete(g:bisectly_log)
   let bisector = Bisector(diagnostic)
   let fault = bisector.locate_fault()
   redraw!

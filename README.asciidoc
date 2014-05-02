@@ -42,11 +42,14 @@ you applied them if you get this message.
 2. Using a test script:
 
   :Bisectly so f-jumps-over-lines.vim
-
++
 This will execute the script `f-jumps-over-lines.vim` in every test
-instance. That test script should call `:Unicorns` and `:Zombies` as
-appropriate. See the `f-jumps-over-lines.vim` script in the Bisectly
-release for an example.
+instance, reporting that the ``faulty'' plugin is vim-fanfingtastic
+(if you have it installed). The test script should call `:Unicorns`
+and `:Zombies` as appropriate. Here, _appropriate_ means `:Zombies`
+when the behaviour is present, `:Unicorns` without -- despite your
+aesthetic take on the issue. See the `f-jumps-over-lines.vim` and
+`View_command.vim` scripts in the Bisectly release for examples.
 
 Weird Things
 ~~~~~~~~~~~~
