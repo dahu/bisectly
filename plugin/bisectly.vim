@@ -1,6 +1,6 @@
 " Vim global plugin for locating faulty plugins
 " Maintainer:	Barry Arthur <barry.arthur@gmail.com>
-" Version:	0.1
+" Version:	0.2
 " Description:	Plugin-manager agnostic fault locator using a BSFL algorithm.
 " Last Change:	2013-04-06
 " License:	Vim License (see :help license)
@@ -12,25 +12,20 @@
 " :helptags ~/.vim/doc
 " :help bisectly
 
-let g:bisectly_version = '0.1'
+let g:bisectly_version = '0.2'
 
 " Vimscript Setup: {{{1
 " Allow use of line continuation.
 let s:save_cpo = &cpo
 set cpo&vim
 
-" load guard
-" uncomment after plugin development.
-" XXX The conditions are only as examples of how to use them. Change them as
-" needed. XXX
-"if exists("g:loaded_bisectly")
-"      \ || v:version < 700
-"      \ || v:version == 703 && !has('patch338')
-"      \ || &compatible
-"  let &cpo = s:save_cpo
-"  finish
-"endif
-"let g:loaded_bisectly = 1
+" if exists("g:loaded_bisectly")
+"       \ || v:version < 700
+"       \ || &compatible
+"   let &cpo = s:save_cpo
+"   finish
+" endif
+" let g:loaded_bisectly = 1
 
 " Options: {{{1
 if !exists('g:bisectly_log')
@@ -129,7 +124,18 @@ function! Bisector(...)
     call self._write_log(data)
   endfunc
 
-  func b.locate_fault() dict
+  func b.locate_fault(type) dict
+    if a:type == 'binary'
+      return self.bsfl()
+    else
+      return self.lsfl()
+    endif
+  endfunc
+
+  func b.lsfl() dict
+  endfunc
+
+  func b.bsfl() dict
     let self.enabled = [0, len(self.all)]
     let self.disabled = []
     " prime the loop below sith a spurious shell_error to force division of
@@ -181,15 +187,22 @@ endfunction
 
 " Public Interface: {{{1
 function! Bisectly(...)
+  let locator = 'binary'
   let diagnostic = ''
   if a:0
-    let diagnostic = a:1
+    let locator = a:1
+    if a:0 == 2
+      let diagnostic = a:2
+    endif
+  endif
+  if locator !~? 'binary\|linear'
+    throw 'Invalid locator: expecting "binary" or "linear"'
   endif
   let old_shell = &shell
   set shell=/bin/sh
   call delete(g:bisectly_log)
   let bisector = Bisector(diagnostic)
-  let fault = bisector.locate_fault()
+  let fault = bisector.locate_fault(locator)
   redraw!
   call bisector.report_fault(fault)
   let &shell = old_shell
