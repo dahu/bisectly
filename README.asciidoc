@@ -51,6 +51,17 @@ when the behaviour is present, `:Unicorns` without -- despite your
 aesthetic take on the issue. See the `f-jumps-over-lines.vim` and
 `View_command.vim` scripts in the Bisectly release for examples.
 
+Binary Search Fault Location (BSFL)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, `:Bisectly` uses binary search (space partitioning) to
+quickly reduce the number of test cases it has to perform to locate
+the fault. This usually works well, but the algorithm can result in
+occasional spurious misses or hits. A slower but more thorough linear
+search is available with the `:LSFL` command. It has the same
+interface as its `:Bisectly` counterpart. For completeness, `:BSFL` is
+a synonym for `:Bisectly`.
+
 Weird Things
 ~~~~~~~~~~~~
 

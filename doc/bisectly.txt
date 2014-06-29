@@ -4,21 +4,23 @@
 			VIM REFERENCE MANUAL	by Barry Arthur
 
 
-Help on using bisectly                                            *bisectly*
+Help on using bisectly                                          *bisectly*
 
 1. Introduction				|bisectly-intro|
 2. Usage				|bisectly-usage|
+2. Binary Search Fault Localisation	|bisectly-algorithm|
 
 ==============================================================================
- 1. INTRODUCTION                                            *bisectly-intro*
+ 1. INTRODUCTION                                          *bisectly-intro*
 
 Bisectly is a plugin-manager agnostic fault localisation tool for
 finding which plugin is causing you nose-bleeds.
 
 ==============================================================================
- 2. USAGE                                                   *bisectly-usage*
+ 2. USAGE                                                 *bisectly-usage*
 
 Start Vim normally and then type:
+                                                               *:Bisectly*
 >
   :Bisectly
 <
@@ -61,4 +63,18 @@ fault, or worse, misrepresenting the origin of the fault.
 
 Happy hunting.
 
-" vim:tw=78:ts=8:ft=help:norl:
+
+==============================================================================
+                                                           *:BSFL* *:LSFL*
+                                           *bisectly-bsfl* *bisectly-lsfl*
+ 3.  Binary Search Fault Location (BSFL)              *bisectly-algorithm*
+
+By default, |:Bisectly| uses binary search (space partitioning) to
+quickly reduce the number of test cases it has to perform to locate
+the fault. This usually works well, but the algorithm can result in
+occasional spurious misses or hits. A slower but more thorough linear
+search is available with the |:LSFL| command. It has the same
+interface as its |:Bisectly| counterpart. For completeness, |:BSFL| is
+a synonym for |:Bisectly|.
+
+" vim:tw=70:ts=8:ft=help:norl:

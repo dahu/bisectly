@@ -39,7 +39,8 @@ endif
 " Private Functions: {{{1
 function! Bisector(...)
   let b = {}
-  let b.all = split(&rtp, '\\\@<!,')
+  let b.all = sort(split(&rtp, '\\\@<!,'))
+  let b.all_count = len(b.all)
   let b.rc_file = tempname() . '_bisectly.vimrc'
   let b.diagnostic = ''
   if a:0
@@ -132,7 +133,39 @@ function! Bisector(...)
     endif
   endfunc
 
+  " if the nth plugin has a subsequent /after/ entry,
+  " has_after() will return 1, otherwise 0
+  func b.has_after(idx) dict
+    if a:idx >= self.all_count
+      return 0
+    else
+      return self.all[a:idx] . '/after'
+            \ == self.all[a:idx + 1]
+    endif
+  endfunc
+
   func b.lsfl() dict
+    let enabled_start     = -1
+    let enabled_end       = -1
+    let self._shell_error = 0
+
+    while enabled_end < self.all_count
+      if self._shell_error == 1
+        break
+      else
+        let enabled_start = enabled_end + 1
+        let enabled_end = enabled_start + self.has_after(enabled_start)
+        let self.enabled = [enabled_start, enabled_end]
+      endif
+      call self.log(["enabled:"] + self.all[self.enabled[0]:self.enabled[1]])
+      call self.vim_test_run()
+    endwhile
+
+    if self._shell_error == 0
+      return -1
+    else
+      return enabled_start
+    endif
   endfunc
 
   func b.bsfl() dict
@@ -186,30 +219,22 @@ function! Bisector(...)
 endfunction
 
 " Public Interface: {{{1
-function! Bisectly(...)
-  let locator = 'binary'
-  let diagnostic = ''
-  if a:0
-    let locator = a:1
-    if a:0 >= 2
-      let diagnostic = join(a:000[1:])
-    endif
-  endif
-  if locator !~? 'binary\|linear'
-    throw 'Invalid locator: expecting "binary" or "linear"'
-  endif
+function! Bisectly(locator, ...)
+  let diagnostic = a:0 ? a:1 : ''
   let old_shell = &shell
   set shell=/bin/sh
   call delete(g:bisectly_log)
   let bisector = Bisector(diagnostic)
-  let fault = bisector.locate_fault(locator)
+  let fault = bisector.locate_fault(a:locator)
   redraw!
   call bisector.report_fault(fault)
   let &shell = old_shell
 endfunc
 
 " Commands: {{{1
-command! -nargs=* -complete=file Bisectly call Bisectly(<f-args>)
+command! -nargs=* -complete=file Bisectly call Bisectly('binary', <q-args>)
+command! -nargs=* -complete=file BSFL     call Bisectly('binary', <q-args>)
+command! -nargs=* -complete=file LSFL     call Bisectly('linear', <q-args>)
 
 " Teardown:{{{1
 "reset &cpo back to users setting
