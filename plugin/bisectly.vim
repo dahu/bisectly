@@ -173,11 +173,11 @@ function! Bisector(...)
   func b.report_fault(fault) dict
     if a:fault < len(self.all)
       echohl WarningMsg
-      echo "Bisectly located a fault with: " . self.all[a:fault]
+      echom "Bisectly located a fault with: " . self.all[a:fault]
       echohl None
     else
       echohl ErrorMsg
-      echo "Bisectly was unable to locate a fault."
+      echom "Bisectly was unable to locate a fault."
       echohl None
     endif
   endfunc
@@ -191,8 +191,8 @@ function! Bisectly(...)
   let diagnostic = ''
   if a:0
     let locator = a:1
-    if a:0 == 2
-      let diagnostic = a:2
+    if a:0 >= 2
+      let diagnostic = join(a:000[1:])
     endif
   endif
   if locator !~? 'binary\|linear'
@@ -209,7 +209,7 @@ function! Bisectly(...)
 endfunc
 
 " Commands: {{{1
-command! -nargs=* -complete=file Bisectly call Bisectly("<args>")
+command! -nargs=* -complete=file Bisectly call Bisectly(<f-args>)
 
 " Teardown:{{{1
 "reset &cpo back to users setting
