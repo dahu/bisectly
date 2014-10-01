@@ -3,8 +3,8 @@ Bisectly
 
 _Quickly Locate Faulty Plugins_
 
-Bisectly is a plugin-manager agnostic fault localisation tool for
-finding which plugin is causing you nose-bleeds.
+Bisectly is a plugin-manager-agnostic fault-localisation tool for
+finding which Vim plugin is causing you nose-bleeds.
 
 Usage
 ~~~~~
@@ -15,7 +15,7 @@ Use this if you want to manually test every activated Vim instance by
 hand. See the Automated Operation for using a fixed command or script
 to automate the hunt.
 
-Start Vim normally and then type `:Bisectly`
+Start Vim normally and then type `:Bisectly`.
 
 You will be presented with a fresh instance of Vim. Test if your
 problem still exists. If it does, type `:Zombies` to signify your
@@ -32,6 +32,10 @@ tell you which one that is. If you answer `:Unicorns` all the way
 through, then Bisectly will complain that there was no fault found.
 You might want to reconsider your tests or the consistency with which
 you applied them if you get this message.
+
+Note that this will not work in gVim. You must use Vim in a terminal.
+If you use gVim, it will appear to hang when you run `:Bisectly`,
+because you can’t see the fresh instance of Vim that was launched.
 
 .Automated Operation
 
