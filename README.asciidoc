@@ -78,7 +78,7 @@ this run) or a plugin they depend on.
 
 One thing to keep an eye out for in your tests is a change in the
 negative-test behaviour. For instance, you know your tests behave a
-certain way when you the bug you're hunting is not present. You know
+certain way when the bug you're hunting is not present. You know
 when it is present, clearly. After a few iterations like this, be
 conscious of new and different messages or failures or responses that
 superficially look like a negative-hit, but might indicate that your
